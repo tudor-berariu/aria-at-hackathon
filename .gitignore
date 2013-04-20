@@ -1,5 +1,7 @@
 # Emacs temporary files
 *~
+\#*\#
+.\#*
 
 # Compiled Object files
 *.slo
