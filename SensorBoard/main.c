@@ -18,6 +18,13 @@ void InterruptLowVector(void){
 #pragma code
 #pragma interruptlow InterruptLow
 void InterruptLow(void){
+	if(UART1_TX_INT_FLAG){
+		uart1TxInterruptHandler();
+	}
+	
+	if(UART2_TX_INT_FLAG){
+		uart2TxInterruptHandler();
+	}
 }
 
 #pragma code InterruptHighVector = 0x08
@@ -30,6 +37,13 @@ void InterruptHighVector(void){
 #pragma code
 #pragma interrupt InterruptHigh
 void InterruptHigh(void){
+	if(UART1_RX_INT_FLAG){
+		uart1RxInterruptHandler();
+	}
+
+	if(UART2_RX_INT_FLAG){
+		uart2RxInterruptHandler();
+	}
 }
 
 void initOSC(void);
@@ -40,7 +54,7 @@ void main(void){
     disableGlobalInterrupts();
 	initOSC();
 	initSerialCom();
-
+	initADC();
 	enableGlobalInterrupts();
 	while(1){
 	}
@@ -51,7 +65,7 @@ void  initOSC(void){
 	unsigned long i;
 	OSCCON = 0x72;
 	OSCTUNEbits.PLLEN = 1;
-	for (i=0;i < 10000;i++){
+	for (i=0;i < 150000;i++){
 		Nop();
 	}
 }
