@@ -51,13 +51,39 @@ void enableGlobalInterrupts(void);
 void disableGlobalInterrupts(void);
 
 void main(void){
+	unsigned long i = 0;
+	char byte = 0;
+	char msg[] = "Hello UART!\r\n";
     disableGlobalInterrupts();
 	initOSC();
 	initSerialCom();
-	initADC();
+//	initADC();
 	enableGlobalInterrupts();
+
+	writeMsg(msg,strlen(msg),UART_CHANNEL1);
+	
 	while(1){
-	}
+
+		if(rxHasData(UART_CHANNEL1)){
+			byte = readByte(UART_CHANNEL1);
+			writeByte(byte, UART_CHANNEL1);
+		}
+
+		if(rxHasData(UART_CHANNEL2)){
+			byte = readByte(UART_CHANNEL2);
+			writeByte(byte, UART_CHANNEL2);
+		}
+		
+//		TXREG2 = 'A';
+//		while(!TXSTA2bits.TRMT);
+//
+//		for (i=0;i < 150000;i++){
+//			Nop();
+//		}
+
+//		TX1REG = 'A';
+//		while(!TXSTA1bits.TRMT);
+    }
 	return;
 }
 
