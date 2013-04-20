@@ -4,8 +4,7 @@
 
 int main(int argc, char *argv) {
     pthread_t *t = start_sound_thread();
-    set_timestep(60);
-    int freq = 100;
+    set_timestep(100);
 
     while(1) {
         printf("UNU\n");
@@ -20,7 +19,7 @@ int main(int argc, char *argv) {
         set_channel(-1);
         usleep(2000 * 1000);
 
-        set_frequency(freq + 1000);
+        set_frequency(2000);
     }
 
     pthread_join(*t, NULL);
