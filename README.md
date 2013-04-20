@@ -3,13 +3,16 @@ aria-at-hackathon
 
 Proiectul echipei ARIA dezvoltat la Raspberry Hack.
 
+Categoria proiectului: HARDWARE
 
-Membrii echipei:
-* Tudor Berariu
-* Dan Novischi
-* Andrei-Traian Sfrenț
+Membrii echipei
+===============
+  - Tudor Berariu
+  - Dan Novischi
+  - Andrei-Traian Sfrenț
 
-Descrierea proiectului:
+Descrierea proiectului
+======================
 
 Dispozitiv ce vine în ajutor persoanelor cu deficiențe de vedere.
 Ce ne propunem: 
