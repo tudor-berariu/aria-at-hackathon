@@ -22,9 +22,9 @@ void InterruptLow(void){
 		uart1TxInterruptHandler();
 	}
 	
-	if(UART2_TX_INT_FLAG){
-		uart2TxInterruptHandler();
-	}
+//	if(UART2_TX_INT_FLAG){
+//		//uart2TxInterruptHandler();
+//	}
 }
 
 #pragma code InterruptHighVector = 0x08
@@ -41,9 +41,9 @@ void InterruptHigh(void){
 		uart1RxInterruptHandler();
 	}
 
-	if(UART2_RX_INT_FLAG){
-		uart2RxInterruptHandler();
-	}
+//	if(UART2_RX_INT_FLAG){
+//		uart2RxInterruptHandler();
+//	}
 }
 
 void initOSC(void);
@@ -51,13 +51,28 @@ void enableGlobalInterrupts(void);
 void disableGlobalInterrupts(void);
 
 void main(void){
+	char byte = 0;
+	char msg[] = "Hello UART!\r\n";
     disableGlobalInterrupts();
 	initOSC();
 	initSerialCom();
-	initADC();
+//	initADC();
 	enableGlobalInterrupts();
+
+	writeMsg(msg,strlen(msg),UART_CHANNEL1);
+	
 	while(1){
-	}
+
+		if(rxHasData(UART_CHANNEL1)){
+			byte = readByte(UART_CHANNEL1);
+			writeByte(byte, UART_CHANNEL1);
+		}
+
+//		writeByte('C',UART_CHANNEL1);
+
+//		TX1REG = 'A';
+//		while(!TXSTA1bits.TRMT);
+    }
 	return;
 }
 

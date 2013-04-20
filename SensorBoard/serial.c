@@ -25,16 +25,15 @@ typedef struct SerialCom{
 
 static SerialCom serialCom[NUM_OF_CHANNELS];
 
-static void initUSART1(void);
+void initUSART1(void);
 static void initUSART2(void);
 static int initSerialChannel(int channel);
 
 
-static void initUSART1(void){
+void initUSART1(void){
 	TRISCbits.RC6 = 0;
 	TRISCbits.RC7 = 1;
-	ANSELCbits.ANSC6 = 0;
-	ANSELCbits.ANSC7 = 0;
+	ANSELC = 0x00;
 	BAUDCON1 = 0x08;
 	SPBRG1 = 0x22;
 	SPBRGH1 = 0x00;
@@ -67,18 +66,18 @@ static void initUSART2(void){
 	TXSTA2 |= 0x24;
 	RCREG2 = 0;
 
-	UART2_TX_INT_PRIORITY = 0;
-	UART2_RX_INT_PRIORITY = 1;
-	
-	UART2_TX_INT_FLAG = 0;
-	UART2_TX_INT_FLAG = 0;
-
-	UART2_RX_INT_ENABLE = 1;
-    UART2_TX_INT_ENABLE = 1;
+//	UART2_TX_INT_PRIORITY = 0;
+//	UART2_RX_INT_PRIORITY = 1;
+//	
+//	UART2_TX_INT_FLAG = 0;
+//	UART2_TX_INT_FLAG = 0;
+//
+//	UART2_RX_INT_ENABLE = 1;
+//    UART2_TX_INT_ENABLE = 1;
 }
 
 static int initSerialChannel(int channel){
-	if((channel != CHANNEL1) && (channel != CHANNEL2)){
+	if((channel != UART_CHANNEL1) && (channel != UART_CHANNEL2)){
 		return -1;
 	}
 	memset(serialCom[channel].tx.buf, 0, TX_BUF_LEN); 
@@ -95,23 +94,23 @@ static int initSerialChannel(int channel){
 }
 
 int initSerialCom(void){
-	if(initSerialChannel(CHANNEL1)){
+	if(initSerialChannel(UART_CHANNEL1)){
 		return -1;
 	}
-	if(initSerialChannel(CHANNEL2)){
+	if(initSerialChannel(UART_CHANNEL2)){
 		return -1;
 	}
 	initUSART1();
-	initUSART2();
+	//initUSART2();
 	return 0;
 }
 
 int writeByte(char byte, int channel){
-	if((channel != CHANNEL1) && (channel != CHANNEL2)){
+	if((channel != UART_CHANNEL1) && (channel != UART_CHANNEL2)){
 		return -1;
 	}
 	UART1_TX_INT_ENABLE = 0;
-	if((serialCom[CHANNEL1].tx.next+1)%(TX_BUF_LEN-1) == serialCom[CHANNEL1].tx.head){
+	if((serialCom[UART_CHANNEL1].tx.next+1)%(TX_BUF_LEN-1) == serialCom[UART_CHANNEL1].tx.head){
 		UART1_TX_INT_ENABLE = 1;		
 		return 0;
 	}
@@ -128,13 +127,13 @@ int writeMsg(const char *msg, int len, int channel){
 	char byte = 0;
 	char loopCondition = 0;
 	
-	if((channel != CHANNEL1) && (channel != CHANNEL2)){
+	if((channel != UART_CHANNEL1) && (channel != UART_CHANNEL2)){
 		return -1;
 	}
 	writeLen = (len < TX_BUF_LEN )?len:TX_BUF_LEN;
 
 	UART1_TX_INT_ENABLE = 0;
-	if((serialCom[CHANNEL1].tx.next+1)%(TX_BUF_LEN-1) == serialCom[CHANNEL1].tx.head){
+	if((serialCom[UART_CHANNEL1].tx.next+1)%(TX_BUF_LEN-1) == serialCom[UART_CHANNEL1].tx.head){
 		UART1_TX_INT_ENABLE = 1;
 		return 0;
 	}
@@ -144,7 +143,7 @@ int writeMsg(const char *msg, int len, int channel){
 		serialCom[channel].tx.buf[serialCom[channel].tx.next] = *(msg+count);
 		serialCom[channel].tx.next = (serialCom[channel].tx.next+1)%(TX_BUF_LEN-1);
 		count++;
-		loopCondition = ((serialCom[CHANNEL1].tx.next+1)%(TX_BUF_LEN-1) != serialCom[CHANNEL1].tx.head) && (count < writeLen);
+		loopCondition = ((serialCom[UART_CHANNEL1].tx.next+1)%(TX_BUF_LEN-1) != serialCom[UART_CHANNEL1].tx.head) && (count < writeLen);
 		if((count%2) == 0){
 			UART1_TX_INT_ENABLE = 1;	
 		}
@@ -158,26 +157,26 @@ int writeMsg(const char *msg, int len, int channel){
 void uart1TxInterruptHandler(void){
 	UART1_TX_INT_FLAG = 0;
 
-	if(serialCom[CHANNEL1].tx.head == serialCom[CHANNEL1].tx.next){
+	if(serialCom[UART_CHANNEL1].tx.head == serialCom[UART_CHANNEL1].tx.next){
 		UART1_TX_INT_ENABLE = 0;
 		return;
 	}
 
-	TXREG1 = serialCom[CHANNEL1].tx.buf[serialCom[CHANNEL1].tx.head];
-	serialCom[CHANNEL1].tx.head = (serialCom[CHANNEL1].tx.head+1)%(TX_BUF_LEN-1);
+	TXREG1 = serialCom[UART_CHANNEL1].tx.buf[serialCom[UART_CHANNEL1].tx.head];
+	serialCom[UART_CHANNEL1].tx.head = (serialCom[UART_CHANNEL1].tx.head+1)%(TX_BUF_LEN-1);
 }
 
 
 char readByte(int channel){
 	char byte;
-	if((channel != CHANNEL1) && (channel != CHANNEL2)){
+	if((channel != UART_CHANNEL1) && (channel != UART_CHANNEL2)){
 		return -1;
 	}
 
 	UART1_RX_INT_ENABLE = 0;
 
 	if(RCSTAbits.OERR){
-		serialCom[CHANNEL1].rx.overflow = 1;
+		serialCom[UART_CHANNEL1].rx.overflow = 1;
 		RCSTAbits.CREN = 0;
 		RCSTAbits.CREN = 1;
 	}
@@ -196,7 +195,7 @@ char readByte(int channel){
 
 char rxHasData(int channel){
 	char status = 0;
-	if((channel != CHANNEL1) && (channel != CHANNEL2)){
+	if((channel != UART_CHANNEL1) && (channel != UART_CHANNEL2)){
 		return -1;
 	}
 	
@@ -211,17 +210,17 @@ char rxHasData(int channel){
 void uart1RxInterruptHandler(void){
 
 	do{
-		if((serialCom[CHANNEL1].rx.next+1)%(RX_BUF_LEN-1) != serialCom[CHANNEL1].rx.head){
-			serialCom[CHANNEL1].rx.buf[serialCom[CHANNEL1].rx.next] = RCREG1;
-			serialCom[CHANNEL1].rx.next = (serialCom[CHANNEL1].rx.next+1)%(RX_BUF_LEN-1);	
+		if((serialCom[UART_CHANNEL1].rx.next+1)%(RX_BUF_LEN-1) != serialCom[UART_CHANNEL1].rx.head){
+			serialCom[UART_CHANNEL1].rx.buf[serialCom[UART_CHANNEL1].rx.next] = RCREG1;
+			serialCom[UART_CHANNEL1].rx.next = (serialCom[UART_CHANNEL1].rx.next+1)%(RX_BUF_LEN-1);	
 		}else{
-			serialCom[CHANNEL1].rx.buffull = 1;
+			serialCom[UART_CHANNEL1].rx.buffull = 1;
 		}
 		
-	}while(UART1_RX_INT_FLAG != 0 && serialCom[CHANNEL1].rx.buffull != 1);
+	}while(UART1_RX_INT_FLAG != 0 && serialCom[UART_CHANNEL1].rx.buffull != 1);
 	
 	if(RCSTAbits.OERR){
-		serialCom[CHANNEL1].rx.overflow = 1;
+		serialCom[UART_CHANNEL1].rx.overflow = 1;
 		RCSTAbits.CREN = 0;
 		RCSTAbits.CREN = 1;
 	}
@@ -232,7 +231,9 @@ void uart2TxInterruptHandler(void){
 }
 
 void uart2RxInterruptHandler(void){
+	char byte = RCREG2;
 }
+
 
 
 

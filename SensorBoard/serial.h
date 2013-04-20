@@ -19,10 +19,17 @@
 #define UART2_TX_INT_PRIORITY IPR3bits.TX2IP
 #define UART2_RX_INT_PRIORITY IPR3bits.RC2IP
 
-#define CHANNEL1 0
-#define CHANNEL2 1
+#define UART_CHANNEL1 0
+#define UART_CHANNEL2 1
 
 int initSerialCom(void);
+
+
+int writeByte(char byte, int channel);
+char readByte(int channel);
+char rxHasData(int channel);
+int writeMsg(const char *msg, int len, int channel);
+
 
 void uart1TxInterruptHandler(void);
 void uart2TxInterruptHandler(void);
