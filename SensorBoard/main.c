@@ -39,6 +39,8 @@ void disableGlobalInterrupts(void);
 void main(void){
     disableGlobalInterrupts();
 	initOSC();
+	initSerialCom();
+
 	enableGlobalInterrupts();
 	while(1){
 	}
